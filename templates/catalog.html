@@ -1,0 +1,31 @@
+<!--show the Areas/catalog 
+
+<ul class="nav flex-column">
+  <li class="nav-item">
+    <a id="26june" class="nav-link active" href="{{url_for('sortArea',area_id=4) }}"></a>
+  </li>
+  <li class="nav-item">
+    <a id="axmeddhagax" class="nav-link" href="{{url_for('sortArea',area_id=3) }}">Ahmed dhagax
+    </a>
+  </li>
+  <li class="nav-item">
+    <a id="axmeddhagax" class="nav-link" href="{{url_for('sortArea',area_id=2) }}">Ibrahim koodbuur
+    </a>
+  </li>
+  <li class="nav-item">
+    <a id="axmeddhagax" class="nav-link" href="{{url_for('sortArea',area_id=1) }}">Gacan libaax
+    </a>
+  </li>
+</ul>
+
+-->
+    {% for i in area%}
+
+      <ul class="nav flex-column">
+  <li class="nav-item">
+    <a id="26june" class="nav-link active" href="{{url_for('sortArea',area_id=i.id, area_name=i.area_name ) }}">{{i.area_name}}</a>
+  </li>
+  
+</ul>
+{% endfor %}
+

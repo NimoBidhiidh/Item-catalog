@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+
+<!--<div class="container h-100">
+  <div class="row h-100 justify-content-center align-items-center">
+   -->
+  
+  <div class="container">
+    <div class="col-sm-3">
+      <h3 style="color: #191970;"> Catagories </h3>
+     <!-- {% for i in area%}
+
+      <ul class="nav flex-column">
+  <li class="nav-item">
+    <a id="26june" class="nav-link active" href="{{url_for('sortArea',area_id=i.id) }}">{{i.area_name}}</a>
+  </li>
+  
+</ul>
+{% endfor %}-->
+
+    {% include "catalog.html" %}
+    
+    <!--<div class="row ">
+    <div class="list-group" id="mylist" role="tablist" >
+          <a class="list-group-item" style="border: 0;" id="" href="#"  role="tab"></a>
+          <a class="list-group-item" style="border: 0;" id="26june" href="#26june"  role="tab">test</a>
+                                         
+        </div>
+      </div>-->
+       
+    </div>
+   
+ 
+  <div class="col-sm-9" >
+
+ 
+    
+
+
+    <div class="row"> 
+      <u ><a href="{{url_for('nhoodAdd')}}" style="color: #9696e8; ">  Add new item </a></u>
+      <br>
+
+    <h3 style="color: #191970;">All catalog</h3>
+
+      {% for i in nhood%}
+
+      <div class="">
+        <ul class="list-group">
+         <a class="list-group-item" href="{{url_for('showNhood',  nhood_id = i.id, nhood_name=i.nhood_name)}}"> {{ i.nhood_name}} (<small class="text-muted">{{i.area_name}}</small>)</a></li>
+
+        </ul>
+
+
+
+      </div>
+
+       {% endfor %}
+
+    </div>
+
+   
+
+   <!-- <div class="tab-content">
+
+        <div class="tab-pane" id="26june">this is only 26 june one a;ldfskflfijrmjmijj/piuzakjsdfho</div>
+
+         <div class="tab-pane" id="all"></div>-->
+  </div>
+</div>
+
+
+</div>
+</div>
+
+
+{% endblock %} 
+<!--
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+-->

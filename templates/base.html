@@ -1,0 +1,39 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    {% if title %}{{ title }} - Catalog{% else %}Welcome to city catalog{% endif %}
+{% endblock %}
+
+{% block navbar %}
+        <nav class="navbar navbar-default" style="background-color: #191970; color: white;">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('Home') }}" style="color:#FFFFFF">Home</a>
+            </div>
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+        
+ 
+
+      </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    
+                    <li><a style="color:#FFFFFF" href="http://localhost:5000/login">Login</a></li>
+                    
+                    
+                    
+                    <li><a style="color:#FFFFFF" href="{{url_for('gdisconnect')}}">Logout</a></li>
+                   
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+{% endblock %}
