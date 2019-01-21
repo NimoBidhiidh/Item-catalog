@@ -23,13 +23,15 @@
 
       </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    
+                     {% if 'username' not in session %}
                     <li><a style="color:#FFFFFF" href="http://localhost:5000/login">Login</a></li>
-                    
+
+            {% else %}
                     
                     
                     <li><a style="color:#FFFFFF" href="{{url_for('gdisconnect')}}">Logout</a></li>
                    
+                   {% endif %}
                 </ul>
             </div>
         </div>

@@ -6,11 +6,12 @@ from flask import Flask, render_template, url_for,\
 from flask_bootstrap import Bootstrap
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from cityDB import Base, AREA, Neighborhood
+from cityDB import Base, AREA, Neighborhood, User
 from flask import session as login_session
+from flask_login import current_user
 import random
 import string
-#from flask_login import LoginManager
+# from flask_login import LoginManager
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
@@ -23,7 +24,7 @@ import requests
 
 
 app = Flask(__name__)
-#login = LoginManager(app)
+# login = LoginManager(app)
 
 
 CLIENT_ID = json.loads(
@@ -107,7 +108,7 @@ def gconnect():
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
         response = make_response(json.dumps('Current user is already\
-            connected.'), 200)
+			connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -126,6 +127,12 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    # see if user exists, if it doesn't make a new one
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -133,7 +140,7 @@ def gconnect():
     output += '<img src="'
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;\
-        -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+		-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
@@ -144,11 +151,11 @@ def gconnect():
 
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
-                   'email'], picture=login_session['picture'])
+        'email'], picture=login_session['picture'])
     session.add(newUser)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
-    return user.id
+    return user.user_id
 
 
 def getUserInfo(user_id):
@@ -159,7 +166,7 @@ def getUserInfo(user_id):
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
-        return user.id
+        return user.user_id
     except:
         return None
 
@@ -208,7 +215,7 @@ def allItemjson():
         items = [
             i.serialize for i in session.query(Neighborhood)
             .filter_by(area_name=catalog_dict[c]["id"]).all()
-            ]
+        ]
         if items:
             catalog_dict[c]["item"] = items
     return jsonify(Catalog=catalog_dict)
@@ -226,6 +233,28 @@ def catalogJson():
 def item():
     item = session.query(Neighborhood).all()
     return jsonify(Neighborhood=[c.serialize for c in item])
+
+# dispalys the items in one catalog
+
+
+@app.route('/area/<int:area_id>/json')
+def catalogItemsJson(area_id):
+    catolog = session.query(AREA).filter_by(id=area_id).one()
+    items = session.query(Neighborhood).filter_by(
+        area_name=area_id).all()
+    return jsonify(items=[i.serialize for i in items])
+
+# displays one Item in spacific catalog
+
+
+@app.route('/area/<int:area_id>/<int:nhood_id>/json')
+def catalogItemJson(area_id, nhood_id):
+    catolog = session.query(AREA).filter_by(id=area_id).one()
+    item = session.query(Neighborhood).filter_by(
+        area_name=area_id,
+        id=nhood_id
+    ).one()
+    return jsonify(item=[item.serialize])
 
 
 # ++++++++
@@ -257,23 +286,23 @@ def showNhood(nhood_id):
 
 @app.route('/area/add', methods=['GET', 'POST'])
 def nhoodAdd():
-	if 'username' not in login_session:
-		return redirect('/login')
-	areas = session.query(AREA).all()
-	if request.method == "POST":
-		area_name = session.query(AREA).filter_by(
-			area_name=request
-			.form['catagries']).one()
-		newitem = Neighborhood(
-			nhood_name=request.form['Nname'],
-			description=request.form['description'],
-			area_name=area_name.id
-			)
+    if 'username' not in login_session:
+        return redirect('/login')
+    areas = session.query(AREA).all()
+    if request.method == "POST":
+        area_name = session.query(AREA).filter_by(
+            area_name=request
+            .form['catagries']).one()
+        newitem = Neighborhood(
+            nhood_name=request.form['Nname'],
+            description=request.form['description'],
+            area_name=area_name.id,
+            user_id=login_session['user_id'])
         session.add(newitem)
         session.commit()
         print('Item Successfully Added!')
         return redirect(url_for('Home'))
-	return render_template("itemadd.html", area=areas)
+    return render_template("itemadd.html", area=areas)
 
 
 @app.route('/area/<int:nhood_id>/neighborhood/edit', methods=['GET', 'POST'])
@@ -282,7 +311,10 @@ def editNeighbor(nhood_id):
     areas = session.query(AREA).all()
     nhood = session.query(Neighborhood).filter_by(id=nhood_id).one()
     if 'username' not in login_session:
-		return redirect('/login')
+        return redirect('/login')
+    if editedItem.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You\
+         are not authorized!')}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         areaName = session.query(AREA).filter_by(
             area_name=request.form['catagries']).one()
@@ -301,15 +333,21 @@ def editNeighbor(nhood_id):
 
 
 @app.route('/area/<int:nhood_id>/neighborhood/delete',
-			methods=['GET', 'POST'])
+           methods=['GET', 'POST'])
 def delNeighbor(nhood_id):
-	if 'username' not in login_session:
-		return redirect('/login')
-	deleItem = session.query(Neighborhood).filter_by(id=nhood_id).one()
-	session.delete(deleItem)
-	session.commit()
-	print('item deleted Successfully!')
-	return render_template("itemdel.html", nhood=deleItem)
+    if 'username' not in login_session:
+        return redirect('/login')
+    deleItem = session.query(Neighborhood).filter_by(
+        id=nhood_id).one()
+    if deleItem.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You \
+        are not authorized!')}</script><body onload='myFunction()'>"
+    else:
+        session.delete(deleItem)
+        session.commit()
+        flash('item deleted Successfully!')
+        return redirect(url_for('Home'))
+    return render_template("itemdel.html", nhood=deleItem)
 
 
 if __name__ == '__main__':

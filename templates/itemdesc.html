@@ -14,8 +14,10 @@
     	<p class="card-text">
     		{{nhood.description}}
     	</p>
+        {% if 'username'  in session %}
     	    <a href="{{url_for('editNeighbor', nhood_id=nhood.id)}}" class="card-link">Edit</a>&nbsp &nbsp &nbsp
     <a href="{{url_for('delNeighbor', nhood_id=nhood.id)}}" class="card-link">Delete</a>
+    {% endif %}
 
 
 </div>
