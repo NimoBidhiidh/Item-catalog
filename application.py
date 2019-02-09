@@ -35,7 +35,7 @@ APPLICATION_NAME = "item catalog"
 bootstrap = Bootstrap(app)
 
 # connecting to database
-engine = create_engine('sqlite:///city.db')
+engine = create_engine('postgresql://catalog:xxxx@localhost/catalog')
 
 Base.metadata.bind = engine
 
