@@ -59,6 +59,6 @@ class Neighborhood(Base):
         }
 
 
-engine = create_engine('sqlite:///city.db')
+engine = create_engine('postgresql://catalog:xxxx@localhost/catalog')
 
 Base.metadata.create_all(engine)
