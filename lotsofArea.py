@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from cityDB import AREA, Base, Neighborhood
 
 
-engine = create_engine('sqlite:///city.db')
+engine = create_engine('postgresql://catalog:xxxx@localhost/catalog')
 
 
 Base.metadata.bind = engine
